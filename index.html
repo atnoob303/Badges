@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROBLOX EXPLORER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–bg: #080808;
+–surface: #101010;
+–border: #1e1e1e;
+–text: #e8e8e8;
+–muted: #555;
+–dim: #333;
+–accent: #ffffff;
+–mono: ‘Space Mono’, monospace;
+–sans: ‘DM Sans’, sans-serif;
+}
+
+html { background-color: #080808 !important; color-scheme: dark; }
+
+body {
+background: #080808 !important;
+color: var(–text);
+font-family: var(–sans);
+min-height: 100vh;
+font-size: 14px;
+line-height: 1.6;
+}
+
+header {
+padding: 40px 40px 28px;
+border-bottom: 1px solid var(–border);
+}
+
+.header-label {
+font-family: var(–mono);
+font-size: 10px;
+letter-spacing: 0.3em;
+color: var(–muted);
+text-transform: uppercase;
+margin-bottom: 6px;
+}
+
+h1 {
+font-family: var(–mono);
+font-size: clamp(20px, 4vw, 32px);
+font-weight: 700;
+letter-spacing: -0.02em;
+color: var(–accent);
+}
+
+.input-area {
+padding: 28px 40px;
+border-bottom: 1px solid var(–border);
+display: flex;
+align-items: center;
+}
+
+.input-prefix {
+font-family: var(–mono);
+font-size: 11px;
+color: var(–muted);
+padding-right: 16px;
+letter-spacing: 0.1em;
+white-space: nowrap;
+}
+
+#universeInput {
+flex: 1;
+background: transparent;
+border: none;
+border-bottom: 1px solid var(–dim);
+color: var(–text);
+font-family: var(–mono);
+font-size: 15px;
+padding: 8px 0;
+outline: none;
+transition: border-color 0.2s;
+letter-spacing: 0.05em;
+}
+
+#universeInput:focus { border-bottom-color: var(–accent); }
+#universeInput::placeholder { color: var(–dim); }
+
+#fetchBtn {
+background: var(–accent);
+color: var(–bg);
+border: none;
+font-family: var(–mono);
+font-size: 11px;
+font-weight: 700;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+padding: 10px 24px;
+cursor: pointer;
+margin-left: 24px;
+transition: opacity 0.2s;
+flex-shrink: 0;
+}
+
+#fetchBtn:hover { opacity: 0.8; }
+#fetchBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.tabs {
+display: flex;
+border-bottom: 1px solid var(–border);
+padding: 0 40px;
+}
+
+.tab {
+font-family: var(–mono);
+font-size: 11px;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–muted);
+padding: 16px 0;
+margin-right: 32px;
+cursor: pointer;
+border-bottom: 1px solid transparent;
+transition: color 0.15s, border-color 0.15s;
+display: flex;
+align-items: center;
+gap: 8px;
+user-select: none;
+}
+
+.tab:hover { color: var(–text); }
+
+.tab.active {
+color: var(–accent);
+border-bottom-color: var(–accent);
+}
+
+.tab-count {
+font-size: 9px;
+color: var(–muted);
+background: var(–border);
+padding: 1px 5px;
+}
+
+.tab.active .tab-count { color: var(–accent); }
+
+#statusBar {
+padding: 10px 40px;
+font-family: var(–mono);
+font-size: 11px;
+color: var(–muted);
+letter-spacing: 0.08em;
+border-bottom: 1px solid var(–border);
+min-height: 38px;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.status-dot {
+width: 5px; height: 5px;
+border-radius: 50%;
+background: var(–muted);
+flex-shrink: 0;
+}
+
+.status-dot.loading { background: #888; animation: pulse 1s infinite; }
+.status-dot.done { background: #e8e8e8; }
+.status-dot.error { background: #666; }
+
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.3; }
+}
+
+.summary-bar {
+padding: 16px 40px;
+border-bottom: 1px solid var(–border);
+display: none;
+gap: 32px;
+flex-wrap: wrap;
+}
+
+.sum-item { display: flex; flex-direction: column; gap: 2px; }
+
+.sum-label {
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(–muted);
+}
+
+.sum-value {
+font-family: var(–mono);
+font-size: 18px;
+font-weight: 700;
+color: var(–accent);
+}
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.item-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 1px;
+background: var(–border);
+}
+
+.item-card {
+background: var(–bg);
+padding: 24px;
+display: flex;
+flex-direction: column;
+gap: 16px;
+transition: background 0.15s;
+animation: fadeIn 0.3s ease both;
+}
+
+.item-card:hover { background: var(–surface); }
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(4px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.card-top { display: flex; gap: 16px; align-items: flex-start; }
+
+.item-icon {
+width: 52px; height: 52px;
+object-fit: cover;
+flex-shrink: 0;
+filter: grayscale(100%);
+opacity: 0.85;
+transition: opacity 0.2s, filter 0.2s;
+background: var(–border);
+}
+
+.item-card:hover .item-icon { filter: grayscale(0%); opacity: 1; }
+
+.icon-placeholder {
+width: 52px; height: 52px;
+background: var(–border);
+flex-shrink: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+font-family: var(–mono);
+font-size: 18px;
+color: var(–dim);
+}
+
+.card-info { flex: 1; min-width: 0; }
+
+.item-name {
+font-family: var(–mono);
+font-size: 12px;
+font-weight: 700;
+color: var(–accent);
+letter-spacing: 0.02em;
+line-height: 1.3;
+word-break: break-word;
+}
+
+.item-id {
+font-family: var(–mono);
+font-size: 9px;
+color: var(–muted);
+margin-top: 4px;
+letter-spacing: 0.05em;
+}
+
+.item-tag {
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: var(–muted);
+border: 1px solid var(–border);
+padding: 2px 6px;
+display: inline-block;
+margin-top: 4px;
+}
+
+.item-card.disabled { opacity: 0.4; }
+
+.item-desc {
+font-size: 12px;
+color: var(–muted);
+line-height: 1.5;
+word-break: break-word;
+font-style: italic;
+}
+
+.item-desc.empty { color: var(–dim); }
+
+.stats-row {
+display: grid;
+border-top: 1px solid var(–border);
+padding-top: 14px;
+}
+
+.stats-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.stats-row.cols-2 { grid-template-columns: 1fr 1fr; }
+
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.stat + .stat { padding-left: 12px; border-left: 1px solid var(–border); }
+
+.stat-label {
+font-family: var(–mono);
+font-size: 8px;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(–muted);
+}
+
+.stat-value {
+font-family: var(–mono);
+font-size: 14px;
+font-weight: 700;
+color: var(–text);
+}
+
+.stat-value.zero { color: var(–dim); }
+.stat-value.sm { font-size: 11px; }
+
+.empty-state {
+padding: 80px 40px;
+text-align: center;
+display: none;
+}
+
+.empty-label {
+font-family: var(–mono);
+font-size: 11px;
+letter-spacing: 0.2em;
+color: var(–muted);
+text-transform: uppercase;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(–bg); }
+::-webkit-scrollbar-thumb { background: var(–border); }
+
+/* STUDIO TAB */
+.studio-wrap { display: flex; flex-direction: column; }
+
+.studio-info-row {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr;
+gap: 1px;
+background: var(–border);
+border-bottom: 1px solid var(–border);
+}
+
+.studio-info-block {
+background: var(–bg);
+padding: 20px 24px;
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.studio-tag {
+font-family: var(–mono);
+font-size: 9px;
+letter-spacing: 0.25em;
+text-transform: uppercase;
+color: var(–muted);
+}
+
+.studio-desc {
+font-size: 12px;
+color: var(–muted);
+line-height: 1.6;
+}
+
+.code-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 12px 20px;
+border-bottom: 1px solid var(–border);
+background: var(–surface);
+}
+
+.code-label {
+font-family: var(–mono);
+font-size: 10px;
+letter-spacing: 0.1em;
+color: var(–muted);
+}
+
+.copy-btn {
+background: var(–accent);
+color: var(–bg);
+border: none;
+font-family: var(–mono);
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0.15em;
+padding: 6px 16px;
+cursor: pointer;
+transition: opacity 0.2s;
+}
+
+.copy-btn:hover { opacity: 0.8; }
+.copy-btn.copied { background: var(–dim); color: var(–muted); }
+
+.code-wrap {
+overflow-x: auto;
+background: var(–bg);
+max-height: calc(100vh - 280px);
+overflow-y: auto;
+}
+
+#codeBlock {
+font-family: var(–mono);
+font-size: 11px;
+line-height: 1.7;
+color: var(–muted);
+padding: 24px;
+white-space: pre;
+tab-size: 4;
+}
+
+.mono {
+font-family: var(–mono);
+font-size: 11px;
+color: var(–text);
+background: var(–surface);
+padding: 1px 5px;
+border: 1px solid var(–border);
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="header-label">Roblox · Game Explorer</div>
+  <h1>ROBLOX EXPLORER</h1>
+</header>
+
+<div class="input-area">
+  <span class="input-prefix">UNIVERSE ID</span>
+  <input type="text" id="universeInput" placeholder="e.g. 7109213369" autocomplete="off" spellcheck="false">
+  <button id="fetchBtn" onclick="fetchAll()">FETCH</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('badges')" id="tab-badges">
+    Badges <span class="tab-count" id="count-badges">—</span>
+  </div>
+  <div class="tab" onclick="switchTab('gamepasses')" id="tab-gamepasses">
+    Gamepasses <span class="tab-count" id="count-gamepasses">—</span>
+  </div>
+  <div class="tab" onclick="switchTab('studio')" id="tab-studio">
+    Studio
+  </div>
+</div>
+
+<div id="statusBar">
+  <span class="status-dot" id="statusDot"></span>
+  <span id="statusText">Enter a Universe ID to begin</span>
+</div>
+
+<!-- BADGES -->
+
+<div class="panel active" id="panel-badges">
+  <div class="summary-bar" id="summary-badges"></div>
+  <div class="item-grid" id="grid-badges"></div>
+  <div class="empty-state" id="empty-badges"><span class="empty-label">No badges found</span></div>
+</div>
+
+<!-- GAMEPASSES -->
+
+<div class="panel" id="panel-gamepasses">
+  <div class="summary-bar" id="summary-gamepasses"></div>
+  <div class="item-grid" id="grid-gamepasses"></div>
+  <div class="empty-state" id="empty-gamepasses"><span class="empty-label">No gamepasses found</span></div>
+</div>
+
+<!-- STUDIO -->
+
+<div class="panel" id="panel-studio">
+  <div class="studio-wrap">
+    <div class="studio-info-row">
+      <div class="studio-info-block">
+        <div class="studio-tag">SETUP</div>
+        <div class="studio-desc">Paste vào <span class="mono">LocalScript</span> trong <span class="mono">StarterPlayerScripts</span></div>
+      </div>
+      <div class="studio-info-block">
+        <div class="studio-tag">YÊU CẦU</div>
+        <div class="studio-desc">Bật <span class="mono">Allow HTTP Requests</span> trong Game Settings</div>
+      </div>
+      <div class="studio-info-block">
+        <div class="studio-tag">TÍNH NĂNG</div>
+        <div class="studio-desc">Check owned badges & gamepasses · Nút BUY cho gamepass chưa có</div>
+      </div>
+    </div>
+    <div class="code-header">
+      <span class="code-label">LocalScript — BadgeGamepassExplorer</span>
+      <button class="copy-btn" id="copyBtn" onclick="copyCode()">COPY</button>
+    </div>
+    <div class="code-wrap">
+      <pre id="codeBlock"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  const input = document.getElementById('universeInput');
+  const btn = document.getElementById('fetchBtn');
+
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') fetchAll(); });
+
+  function setStatus(type, msg) {
+    document.getElementById('statusDot').className = 'status-dot ' + type;
+    document.getElementById('statusText').textContent = msg;
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+
+  // ── LUA CODE ────────────────────────────────────
+  const LUA_CODE = `--[[
+    BADGE & GAMEPASS EXPLORER
+    LocalScript — StarterPlayerScripts
+    - Xem toàn bộ Badges / Gamepasses
+    - Check player đang chơi hoặc UserID
+    - Hiển thị trạng thái đã có chưa
+    - Nút mua Gamepass nếu chưa sở hữu
+]]
+
+-- SERVICES
+local Players             = game:GetService("Players")
+local BadgeService        = game:GetService("BadgeService")
+local MarketplaceService  = game:GetService("MarketplaceService")
+local HttpService         = game:GetService("HttpService")
+local TweenService        = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+local UNIVERSE_ID = game.GameId
+
+-- CONFIG
+local CONFIG = {
+    BADGE_API    = "https://badges.roproxy.com/v1/universes/%d/badges?limit=100&sortOrder=Asc",
+    GAMEPASS_API = "https://apis.roproxy.com/game-passes/v1/universes/%d/game-passes?limit=100",
+    TWEEN_TIME   = 0.18,
+}
+
+-- COLORS
+local C = {
+    BG       = Color3.fromRGB(10, 10, 10),
+    SURFACE  = Color3.fromRGB(16, 16, 16),
+    BORDER   = Color3.fromRGB(30, 30, 30),
+    TEXT     = Color3.fromRGB(232, 232, 232),
+    MUTED    = Color3.fromRGB(80, 80, 80),
+    DIM      = Color3.fromRGB(45, 45, 45),
+    WHITE    = Color3.fromRGB(255, 255, 255),
+    BLACK    = Color3.fromRGB(0, 0, 0),
+    OWNED    = Color3.fromRGB(200, 200, 200),
+}
+
+-- UTILS
+local function safeHttp(url)
+    local ok, res = pcall(function() return HttpService:GetAsync(url) end)
+    if not ok then return nil end
+    local ok2, data = pcall(function() return HttpService:JSONDecode(res) end)
+    return ok2 and data or nil
+end
+
+local function label(parent, text, size, color, font, xAnchor)
+    local l = Instance.new("TextLabel")
+    l.BackgroundTransparency = 1
+    l.Text = text
+    l.TextSize = size
+    l.TextColor3 = color or C.TEXT
+    l.Font = font or Enum.Font.Gotham
+    l.TextXAlignment = xAnchor or Enum.TextXAlignment.Left
+    l.TextWrapped = true
+    l.Parent = parent
+    return l
+end
+
+local function frame(parent, bg, size, pos)
+    local f = Instance.new("Frame")
+    f.BackgroundColor3 = bg or C.SURFACE
+    f.BorderSizePixel = 0
+    f.Size = size or UDim2.new(1, 0, 0, 40)
+    if pos then f.Position = pos end
+    f.Parent = parent
+    return f
+end
+
+local function stroke(obj, color, thickness)
+    local s = Instance.new("UIStroke")
+    s.Color = color or C.BORDER
+    s.Thickness = thickness or 1
+    s.Parent = obj
+    return s
+end
+
+local function imgLabel(parent, id, size, pos)
+    local img = Instance.new("ImageLabel")
+    img.BackgroundColor3 = C.DIM
+    img.BorderSizePixel = 0
+    img.Size = size or UDim2.new(0, 48, 0, 48)
+    if pos then img.Position = pos end
+    img.Image = id and ("rbxassetid://" .. id) or ""
+    img.ScaleType = Enum.ScaleType.Fit
+    img.Parent = parent
+    return img
+end
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BadgeGamepassExplorer"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = LocalPlayer.PlayerGui
+
+-- Toggle Button
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 120, 0, 32)
+ToggleBtn.Position = UDim2.new(1, -140, 1, -52)
+ToggleBtn.BackgroundColor3 = C.BG
+ToggleBtn.BorderSizePixel = 0
+ToggleBtn.Text = "EXPLORER"
+ToggleBtn.TextSize = 11
+ToggleBtn.TextColor3 = C.TEXT
+ToggleBtn.Font = Enum.Font.GothamMono
+ToggleBtn.Parent = ScreenGui
+stroke(ToggleBtn, C.BORDER, 1)
+
+-- Main Window
+local Window = frame(ScreenGui, C.BG, UDim2.new(0, 380, 0, 540))
+Window.Position = UDim2.new(1, -400, 1, -560)
+Window.ClipsDescendants = true
+Window.Visible = false
+stroke(Window, C.BORDER, 1)
+
+local windowOpen = false
+ToggleBtn.MouseButton1Click:Connect(function()
+    windowOpen = not windowOpen
+    Window.Visible = windowOpen
+end)
+
+-- Header
+local Header = frame(Window, C.BG, UDim2.new(1, 0, 0, 48))
+local titleLbl = label(Header, "EXPLORER", 11, C.WHITE, Enum.Font.GothamMono)
+titleLbl.Size = UDim2.new(1, -16, 1, 0)
+titleLbl.Position = UDim2.new(0, 16, 0, 0)
+frame(Window, C.BORDER, UDim2.new(1, 0, 0, 1)).Position = UDim2.new(0, 0, 0, 48)
+
+-- User Input
+local InputRow = frame(Window, C.BG, UDim2.new(1, 0, 0, 40))
+InputRow.Position = UDim2.new(0, 0, 0, 49)
+
+local userBox = Instance.new("TextBox")
+userBox.Size = UDim2.new(1, -90, 0, 28)
+userBox.Position = UDim2.new(0, 12, 0, 6)
+userBox.BackgroundColor3 = C.SURFACE
+userBox.BorderSizePixel = 0
+userBox.Text = ""
+userBox.PlaceholderText = "UserID  (blank = you)"
+userBox.PlaceholderColor3 = C.MUTED
+userBox.TextColor3 = C.TEXT
+userBox.TextSize = 11
+userBox.Font = Enum.Font.GothamMono
+userBox.ClearTextOnFocus = false
+userBox.Parent = InputRow
+stroke(userBox, C.BORDER, 1)
+local uPad = Instance.new("UIPadding")
+uPad.PaddingLeft = UDim.new(0, 8)
+uPad.Parent = userBox
+
+local checkBtn = Instance.new("TextButton")
+checkBtn.Size = UDim2.new(0, 68, 0, 28)
+checkBtn.Position = UDim2.new(1, -80, 0, 6)
+checkBtn.BackgroundColor3 = C.WHITE
+checkBtn.BorderSizePixel = 0
+checkBtn.Text = "CHECK"
+checkBtn.TextSize = 10
+checkBtn.TextColor3 = C.BLACK
+checkBtn.Font = Enum.Font.GothamMonoBold
+checkBtn.Parent = InputRow
+
+frame(Window, C.BORDER, UDim2.new(1, 0, 0, 1)).Position = UDim2.new(0, 0, 0, 89)
+
+-- Tabs
+local TabRow = frame(Window, C.BG, UDim2.new(1, 0, 0, 36))
+TabRow.Position = UDim2.new(0, 0, 0, 90)
+
+local function makeTab(text, xPos)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 110, 1, 0)
+    btn.Position = UDim2.new(0, xPos, 0, 0)
+    btn.BackgroundTransparency = 1
+    btn.Text = text
+    btn.TextSize = 10
+    btn.Font = Enum.Font.GothamMono
+    btn.TextColor3 = C.MUTED
+    btn.Parent = TabRow
+    local ul = frame(btn, C.BORDER, UDim2.new(1, 0, 0, 1))
+    ul.Position = UDim2.new(0, 0, 1, -1)
+    ul.AnchorPoint = Vector2.new(0, 1)
+    return btn, ul
+end
+
+local tabBadge, ulBadge       = makeTab("BADGES", 12)
+local tabGamepass, ulGamepass = makeTab("GAMEPASSES", 120)
+frame(Window, C.BORDER, UDim2.new(1, 0, 0, 1)).Position = UDim2.new(0, 0, 0, 126)
+
+-- Scroll
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(1, 0, 1, -128)
+ScrollFrame.Position = UDim2.new(0, 0, 0, 128)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.BorderSizePixel = 0
+ScrollFrame.ScrollBarThickness = 2
+ScrollFrame.ScrollBarImageColor3 = C.BORDER
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+ScrollFrame.Parent = Window
+
+local ListLayout = Instance.new("UIListLayout")
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ListLayout.Padding = UDim.new(0, 1)
+ListLayout.Parent = ScrollFrame
+
+local statusLbl = label(ScrollFrame, "Leave blank or enter UserID → CHECK", 10, C.MUTED, Enum.Font.GothamMono)
+statusLbl.Size = UDim2.new(1, 0, 0, 40)
+statusLbl.TextXAlignment = Enum.TextXAlignment.Center
+statusLbl.LayoutOrder = 0
+
+-- Cards
+local function clearCards()
+    for _, c in ipairs(ScrollFrame:GetChildren()) do
+        if c:IsA("Frame") then c:Destroy() end
+    end
+end
+
+local function makeCard(iconId, name, subtext, owned, layoutOrder, onBuy)
+    local card = frame(ScrollFrame, C.BG, UDim2.new(1, 0, 0, 68))
+    card.LayoutOrder = layoutOrder
+    stroke(card, C.BORDER, 1)
+
+    imgLabel(card, iconId, UDim2.new(0, 44, 0, 44)).Position = UDim2.new(0, 12, 0.5, -22)
+
+    local nameLbl = label(card, name, 12, owned and C.TEXT or C.MUTED, Enum.Font.GothamMono)
+    nameLbl.Size = UDim2.new(1, -130, 0, 18)
+    nameLbl.Position = UDim2.new(0, 66, 0, 12)
+    nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+
+    local subLbl = label(card, subtext, 10, C.MUTED, Enum.Font.Gotham)
+    subLbl.Size = UDim2.new(1, -130, 0, 14)
+    subLbl.Position = UDim2.new(0, 66, 0, 32)
+    subLbl.TextTruncate = Enum.TextTruncate.AtEnd
+
+    local tagBtn = Instance.new("TextButton")
+    tagBtn.Size = UDim2.new(0, 52, 0, 22)
+    tagBtn.Position = UDim2.new(1, -64, 0.5, -11)
+    tagBtn.BorderSizePixel = 0
+    tagBtn.TextSize = 9
+    tagBtn.Font = Enum.Font.GothamMonoBold
+
+    if owned == true then
+        tagBtn.Text = "OWNED"
+        tagBtn.BackgroundColor3 = C.DIM
+        tagBtn.TextColor3 = C.OWNED
+        tagBtn.Active = false
+    elseif owned == false and onBuy then
+        tagBtn.Text = "BUY"
+        tagBtn.BackgroundColor3 = C.WHITE
+        tagBtn.TextColor3 = C.BLACK
+        tagBtn.MouseButton1Click:Connect(onBuy)
+    else
+        tagBtn.Text = owned == false and "—" or "·"
+        tagBtn.BackgroundColor3 = C.DIM
+        tagBtn.TextColor3 = C.MUTED
+        tagBtn.Active = false
+    end
+    tagBtn.Parent = card
+
+    -- Left owned bar
+    local bar = frame(card, owned and C.MUTED or C.DIM, UDim2.new(0, 2, 0, 36))
+    bar.Position = UDim2.new(0, 0, 0.5, -18)
+
+    return card
+end
+
+-- State
+local currentTab = "badges"
+local cachedBadges, cachedPasses = {}, {}
+local cachedOwned = { badges = {}, passes = {} }
+
+local function setTab(tab)
+    currentTab = tab
+    if tab == "badges" then
+        tabBadge.TextColor3 = C.WHITE;   ulBadge.BackgroundColor3 = C.WHITE
+        tabGamepass.TextColor3 = C.MUTED; ulGamepass.BackgroundColor3 = C.BORDER
+    else
+        tabGamepass.TextColor3 = C.WHITE;  ulGamepass.BackgroundColor3 = C.WHITE
+        tabBadge.TextColor3 = C.MUTED;    ulBadge.BackgroundColor3 = C.BORDER
+    end
+end
+
+local function renderCards()
+    clearCards()
+    local list = currentTab == "badges" and cachedBadges or cachedPasses
+    if #list == 0 then
+        statusLbl.Visible = true
+        statusLbl.Text = "No " .. currentTab .. " found"
+        return
+    end
+    statusLbl.Visible = false
+
+    for i, item in ipairs(list) do
+        if currentTab == "badges" then
+            local owned = cachedOwned.badges[item.id]
+            local sub = "Total: " .. tostring(item.statistics and item.statistics.awardedCount or 0)
+            makeCard(item.displayIconImageId or item.iconImageId, item.displayName or item.name, sub, owned, i, nil)
+        else
+            local owned = cachedOwned.passes[item.id]
+            local price = item.price and ("R$ "..item.price) or (item.isForSale and "Free" or "Off Sale")
+            makeCard(item.displayIconImageAssetId, item.displayName or item.name, price, owned, i,
+                not owned and item.isForSale and function()
+                    MarketplaceService:PromptGamePassPurchase(LocalPlayer, item.id)
+                end or nil
+            )
+        end
+    end
+end
+
+local function fetchAll(userId)
+    clearCards()
+    statusLbl.Visible = true
+
+    statusLbl.Text = "Fetching badges…"
+    local bd = safeHttp(CONFIG.BADGE_API:format(UNIVERSE_ID))
+    cachedBadges = bd and bd.data or {}
+
+    statusLbl.Text = "Fetching gamepasses…"
+    local pd = safeHttp(CONFIG.GAMEPASS_API:format(UNIVERSE_ID))
+    cachedPasses = pd and pd.gamePasses or {}
+
+    statusLbl.Text = "Checking ownership…"
+    cachedOwned = { badges = {}, passes = {} }
+
+    for _, b in ipairs(cachedBadges) do
+        local ok, has = pcall(BadgeService.UserHasBadgeAsync, BadgeService, userId, b.id)
+        cachedOwned.badges[b.id] = ok and has or false
+        task.wait()
+    end
+    for _, p in ipairs(cachedPasses) do
+        local ok, has = pcall(MarketplaceService.UserOwnsGamePassAsync, MarketplaceService, userId, p.id)
+        cachedOwned.passes[p.id] = ok and has or false
+        task.wait()
+    end
+
+    tabBadge.Text = "BADGES (" .. #cachedBadges .. ")"
+    tabGamepass.Text = "GAMEPASSES (" .. #cachedPasses .. ")"
+    statusLbl.Visible = false
+    renderCards()
+end
+
+-- Events
+tabBadge.MouseButton1Click:Connect(function() setTab("badges"); renderCards() end)
+tabGamepass.MouseButton1Click:Connect(function() setTab("gamepasses"); renderCards() end)
+
+checkBtn.MouseButton1Click:Connect(function()
+    local raw = userBox.Text:match("^%s*(.-)%s*$")
+    local userId = raw == "" and LocalPlayer.UserId or tonumber(raw)
+    if not userId then
+        statusLbl.Visible = true
+        statusLbl.Text = "Invalid UserID!"
+        return
+    end
+    task.spawn(fetchAll, userId)
+end)
+
+setTab("badges")`;
+
+  document.getElementById('codeBlock').textContent = LUA_CODE;
+
+  function copyCode() {
+    navigator.clipboard.writeText(LUA_CODE).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'COPIED!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'COPY';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── BADGES ──────────────────────────────────────
+  async function fetchAllBadges(uid) {
+    let all = [], cursor = null, page = 1;
+    do {
+      let url = `https://badges.roproxy.com/v1/universes/${uid}/badges?limit=100&sortOrder=Asc`;
+      if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
+      setStatus('loading', `Fetching badges page ${page}…`);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Badges HTTP ${res.status}`);
+      const data = await res.json();
+      all = all.concat(data.data || []);
+      cursor = data.nextPageCursor || null;
+      page++;
+    } while (cursor);
+    return all;
+  }
+
+  async function renderBadges(badges) {
+    const grid = document.getElementById('grid-badges');
+    const summary = document.getElementById('summary-badges');
+    const empty = document.getElementById('empty-badges');
+    grid.innerHTML = ''; summary.style.display = 'none'; empty.style.display = 'none';
+
+    if (!badges.length) { empty.style.display = 'block'; return; }
+
+    const totalAwarded = badges.reduce((s,b) => s+(b.statistics?.awardedCount||0), 0);
+    const withOwners = badges.filter(b => b.statistics?.awardedCount > 0).length;
+
+    summary.style.display = 'flex';
+    summary.innerHTML = `
+      <div class="sum-item"><div class="sum-label">Total</div><div class="sum-value">${badges.length}</div></div>
+      <div class="sum-item"><div class="sum-label">Total Awarded</div><div class="sum-value">${totalAwarded.toLocaleString()}</div></div>
+      <div class="sum-item"><div class="sum-label">Has Owners</div><div class="sum-value">${withOwners}</div></div>
+    `;
+
+    setStatus('loading', 'Loading badge thumbnails…');
+    const thumbMap = {};
+    const ids = badges.map(b => b.id);
+    for (let i = 0; i < ids.length; i += 100) {
+      const chunk = ids.slice(i, i+100).join(',');
+      try {
+        const r = await fetch(`https://thumbnails.roproxy.com/v1/badges/icons?badgeIds=${chunk}&size=150x150&format=Png&isCircular=false`);
+        const d = await r.json();
+        (d.data||[]).forEach(t => { if(t.imageUrl) thumbMap[t.targetId] = t.imageUrl; });
+      } catch(e) {}
+    }
+
+    badges.forEach((b, i) => {
+      const card = document.createElement('div');
+      card.className = 'item-card' + (b.enabled ? '' : ' disabled');
+      card.style.animationDelay = `${Math.min(i*15,400)}ms`;
+
+      const thumb = thumbMap[b.id];
+      const icon = thumb
+        ? `<img class="item-icon" src="${thumb}" alt="" loading="lazy">`
+        : `<div class="icon-placeholder">?</div>`;
+
+      const desc = b.description || b.displayDescription || '';
+      const descEl = desc
+        ? `<div class="item-desc">${esc(desc.replace(/\n/g,' ').substring(0,120))}${desc.length>120?'…':''}</div>`
+        : `<div class="item-desc empty">No description</div>`;
+
+      const s = b.statistics || {};
+      const awarded = s.awardedCount ?? 0;
+      const yest = s.pastDayAwardedCount ?? 0;
+      const win = (s.winRatePercentage ?? 0).toFixed(1);
+
+      card.innerHTML = `
+        <div class="card-top">
+          ${icon}
+          <div class="card-info">
+            <div class="item-name">${esc(b.displayName||b.name)}</div>
+            <div class="item-id">#${b.id}</div>
+            ${!b.enabled ? '<span class="item-tag">Disabled</span>' : ''}
+          </div>
+        </div>
+        ${descEl}
+        <div class="stats-row cols-3">
+          <div class="stat"><div class="stat-label">Total</div><div class="stat-value ${awarded===0?'zero':''}">${awarded.toLocaleString()}</div></div>
+          <div class="stat"><div class="stat-label">Yesterday</div><div class="stat-value ${yest===0?'zero':''}">${yest.toLocaleString()}</div></div>
+          <div class="stat"><div class="stat-label">Win %</div><div class="stat-value ${win==='0.0'?'zero':''}">${win}%</div></div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    document.getElementById('count-badges').textContent = badges.length;
+  }
+
+  // ── GAMEPASSES ──────────────────────────────────
+  async function fetchAllGamepasses(uid) {
+    let all = [], token = null, page = 1;
+    do {
+      let url = `https://apis.roproxy.com/game-passes/v1/universes/${uid}/game-passes?limit=100`;
+      if (token) url += `&pageToken=${encodeURIComponent(token)}`;
+      setStatus('loading', `Fetching gamepasses page ${page}…`);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Gamepasses HTTP ${res.status}`);
+      const data = await res.json();
+      all = all.concat(data.gamePasses || []);
+      token = data.nextPageToken && data.nextPageToken !== '' ? data.nextPageToken : null;
+      page++;
+    } while (token);
+    return all;
+  }
+
+  async function renderGamepasses(passes) {
+    const grid = document.getElementById('grid-gamepasses');
+    const summary = document.getElementById('summary-gamepasses');
+    const empty = document.getElementById('empty-gamepasses');
+    grid.innerHTML = ''; summary.style.display = 'none'; empty.style.display = 'none';
+
+    if (!passes.length) { empty.style.display = 'block'; return; }
+
+    const forSale = passes.filter(p => p.isForSale).length;
+
+    summary.style.display = 'flex';
+    summary.innerHTML = `
+      <div class="sum-item"><div class="sum-label">Total</div><div class="sum-value">${passes.length}</div></div>
+      <div class="sum-item"><div class="sum-label">For Sale</div><div class="sum-value">${forSale}</div></div>
+      <div class="sum-item"><div class="sum-label">Off Sale</div><div class="sum-value">${passes.length - forSale}</div></div>
+    `;
+
+    setStatus('loading', 'Loading gamepass thumbnails…');
+    const thumbMap = {};
+    const ids = passes.map(p => p.id);
+    for (let i = 0; i < ids.length; i += 100) {
+      const chunk = ids.slice(i, i+100).join(',');
+      try {
+        const r = await fetch(`https://thumbnails.roproxy.com/v1/game-passes?gamePassIds=${chunk}&size=150x150&format=Png`);
+        const d = await r.json();
+        (d.data||[]).forEach(t => { if(t.imageUrl) thumbMap[t.targetId] = t.imageUrl; });
+      } catch(e) {}
+    }
+
+    passes.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'item-card' + (!p.isForSale ? ' disabled' : '');
+      card.style.animationDelay = `${Math.min(i*15,400)}ms`;
+
+      const thumb = thumbMap[p.id];
+      const iconId = p.displayIconImageAssetId;
+      const icon = thumb
+        ? `<img class="item-icon" src="${thumb}" alt="" loading="lazy">`
+        : iconId
+          ? `<img class="item-icon" src="https://thumbnails.roproxy.com/v1/assets?assetIds=${iconId}&size=150x150&format=Png" alt="" loading="lazy">`
+          : `<div class="icon-placeholder">G</div>`;
+
+      const desc = p.displayDescription || '';
+      const descEl = desc
+        ? `<div class="item-desc">${esc(desc.replace(/\n/g,' ').substring(0,120))}${desc.length>120?'…':''}</div>`
+        : `<div class="item-desc empty">No description</div>`;
+
+      const priceTag = p.price != null
+        ? `<span class="item-tag">R$ ${Number(p.price).toLocaleString()}</span>`
+        : `<span class="item-tag">${p.isForSale ? 'Free' : 'Off Sale'}</span>`;
+
+      const created = new Date(p.created).toLocaleDateString('en-GB');
+      const updated = new Date(p.updated).toLocaleDateString('en-GB');
+
+      card.innerHTML = `
+        <div class="card-top">
+          ${icon}
+          <div class="card-info">
+            <div class="item-name">${esc(p.displayName||p.name)}</div>
+            <div class="item-id">#${p.id}</div>
+            ${priceTag}
+          </div>
+        </div>
+        ${descEl}
+        <div class="stats-row cols-2">
+          <div class="stat"><div class="stat-label">Created</div><div class="stat-value sm">${created}</div></div>
+          <div class="stat"><div class="stat-label">Updated</div><div class="stat-value sm">${updated}</div></div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    document.getElementById('count-gamepasses').textContent = passes.length;
+  }
+
+  // ── MAIN ────────────────────────────────────────
+  async function fetchAll() {
+    const id = input.value.trim();
+    if (!id) return;
+
+    btn.disabled = true;
+    ['badges','gamepasses'].forEach(k => {
+      document.getElementById('grid-'+k).innerHTML = '';
+      document.getElementById('summary-'+k).style.display = 'none';
+      document.getElementById('empty-'+k).style.display = 'none';
+      document.getElementById('count-'+k).textContent = '—';
+    });
+    setStatus('loading', 'Connecting…');
+
+    try {
+      const [badges, passes] = await Promise.all([
+        fetchAllBadges(id),
+        fetchAllGamepasses(id)
+      ]);
+      await renderBadges(badges);
+      await renderGamepasses(passes);
+      setStatus('done', `${badges.length} badges · ${passes.length} gamepasses loaded`);
+    } catch(e) {
+      setStatus('error', `Error: ${e.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+</script>
+
+</body>
+</html>
