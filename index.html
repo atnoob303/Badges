@@ -1063,7 +1063,7 @@ setTab("badges")`;
 
       const priceTag = p.price != null
         ? `<span class="item-tag">R$ ${Number(p.price).toLocaleString()}</span>`
-        : `<span class="item-tag">${p.isForSale ? 'Free' : 'Off Sale'}</span>`;
+        : `<span class="item-tag">${p.isForSale ? 'For Sale' : 'Off Sale'}</span>`;
 
       const created = new Date(p.created).toLocaleDateString('en-GB');
       const updated = new Date(p.updated).toLocaleDateString('en-GB');
